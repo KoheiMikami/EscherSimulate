@@ -33,6 +33,14 @@
   <script>
     Line = function() {
       this.curveObject;
+      this.startPos = {x:0,y:0};
+      this.endPos = {x:0,y:0};
+      this.pos = {x:0,y:0};
+      this.count;
+      this.startPosArr = [];
+      this.endPosArr = [];
+      this.pct = 0;
+      this.isAnimation = false;
     };
     Line.prototype.createLine = function() {
       var curve = new THREE.CubicBezierCurve3(
@@ -52,98 +60,81 @@
 
       return this.curveObject;
     };
-    Line.prototype.setNoiseVal = function(val) {
-      console.log(this.curveObject);
+
+    Line.prototype.vertexOp = function(val) {
       this.curveObject.geometry.verticesNeedUpdate = true
 
       for (i = 0; i < this.curveObject.geometry.vertices.length; i++) {
         var vertex = this.curveObject.geometry.vertices[i];
         vertex.y = val[i];
-        //vertex.y = 10;
-        //vertex.x =val[i];
-      }
-    };
-    Line.prototype.setNoiseValTest = function(val) {
-      console.log(this.curveObject);
-      this.curveObject.geometry.verticesNeedUpdate = true
-      this.curveObject.geometry.vertices[1] = val;
-      // for (i = 0; i < this.curveObject.geometry.vertices.length; i++) {
-      //   var vertex = this.curveObject.geometry.vertices[i];
-      //   //vertex.y = val[1];
-      //   //vertex.y = 10;
-      //   //vertex.x =val[i];
-      // }
-    };
-    Line.prototype.setNoiseValTest2 = function(val) {
-      console.log(this.curveObject);
-      this.curveObject.geometry.verticesNeedUpdate = true
-
-      for (i = 0; i < this.curveObject.geometry.vertices.length; i++) {
-        var vertex = this.curveObject.geometry.vertices[i];
-        vertex.y = val;
-        //vertex.y = 10;
-        //vertex.x =val[i];
       }
     };
 
-    Rect = function() {
-      this.root = new THREE.Object3D();
-      this.rectWidth = 300;
-      this.rectHeight = 300;
+    Line.prototype.setNoiseVal = function(val) {
+      this.vertexOp(val);
     };
-    Rect.prototype.degToRad = function(deg) {
-      return deg * Math.PI / 180;
-    };
-    Rect.prototype.createLine = function(rotationZ, translateX, translateY) {
-      var simplexNoise = new SimplexNoise;
-      var curve = new THREE.CubicBezierCurve3(
-        new THREE.Vector3(0, 0, 0),
-        new THREE.Vector3(100, 0, 0),
-        new THREE.Vector3(200, 0, 0),
-        new THREE.Vector3(this.rectWidth, 0, 0)
-      );
 
-      var curveObject = new THREE.Line((function() {
-        var geometry = new THREE.Geometry();
-        geometry.vertices = curve.getPoints(5);
-        return geometry;
-      })(), new THREE.LineBasicMaterial({
-        color: 0xffffff
-      }));
-
-      curveObject.rotation.z = this.degToRad(rotationZ);
-      curveObject.translateX(translateX);
-      curveObject.translateY(translateY);
-      this.root.add(curveObject);
-    };
-    Rect.prototype.addRect = function(x, y) {
-      this.createLine(0, 0, 0);
-      this.createLine(-90, 0, 300);
-      this.createLine(0, 0, -300);
-      this.createLine(-90, 0, 0);
-      this.root.translateX(x);
-      this.root.translateY(y);
-      this.root.scale.set(0.1, 0.1, 0.1);
-      console.log(this.root);
-      return this.root;
-    };
-    Rect.prototype.addAnimate = function(num) {
-      this.root.children[0].geometry.verticesNeedUpdate = true
-      var simplexNoise = new SimplexNoise;
-      for (i = 0; i < this.root.children[0].geometry.vertices.length; i++) {
-        var vertex = this.root.children[0].geometry.vertices[i];
-
-        //vertex.y = simplexNoise.noise(vertex.x / 20, vertex.y / 20)*100;
-        vertex.y = num[i];
+    Line.prototype.setStartPos = function (val) {
+      this.vertexOp(val);
+      this.isAnimation = false;
+      this.startPosArr.length = 0;
+      for (var i = 0; i < this.curveObject.geometry.vertices.length; i++) {
+        this.startPosArr.push(val[i]);
       }
     };
 
-    var syousuten2ika = function (val) {
-      var val2 = 9.87654321;
+    Line.prototype.setEndPos = function (val) {
+      this.isAnimation = true;
+      this.endPosArr.length = 0;
+      for (var i = 0; i < this.curveObject.geometry.vertices.length; i++) {
+        this.endPosArr.push(val[i]);
+      }
+    };
+    Line.prototype.getPct = function () {
+      return this.pct;
+    };
+
+    Line.prototype.interpolateByPct = function(pct) {
+      var arr = [];
+      for (var i = 0; i < this.curveObject.geometry.vertices.length; i++) {
+        arr.push((1.0 - pct) * this.startPosArr[i] + (pct) * this.endPosArr[i]);
+      }
+      return arr;
+    };
+    Line.prototype.vertexPctUpdate = function() {
+      if (this.isAnimation) {
+        this.pct += 0.1;
+
+        if (this.pct > 1.0) {
+          var array = [0,0,0,0,0,0];
+          this.setStartPos(this.interpolateByPct(this.pct));
+          this.pct = 0.0;
+          this.isAnimation = false;
+        }else{
+          this.vertexOp(this.interpolateByPct(this.pct));
+        }
+      }
+
+
+    };
+
+    var syousuten2ika = function(val) {
+      var val2 = val;
       val2 *= 10;
       val2 = Math.floor(val);
       val2 /= 10;
       return val2;
+    };
+
+    var isInteger = function (val) {
+      var enumArr = ["true", "none", "false"];
+      if (val > 0) {
+        return enumArr[0];
+      } else if (val < 0) {
+        return enumArr[2];
+      }else{
+        return enumArr[1];
+      }
     };
 
     (function() {
@@ -174,68 +165,35 @@
       scene.add(modelLine);
 
       var simpleNoise = new SimplexNoise;
-      var date = new Date();
 
+      //頂点に初期値を与える
       var noiseArr = [];
       for (var i = 0; i < modelLine.geometry.vertices.length; i++) {
 
         var vertex = modelLine.geometry.vertices[i];
-        //console.log(simpleNoise.noise(vertex.x / 20, vertex.y / 20) * 100);
         var randomNoise = simpleNoise.noise(vertex.x / 20, vertex.y / 20) * 100;
         noiseArr.push(syousuten2ika(randomNoise));
+
       }
-      line.setNoiseVal(noiseArr);
-      // for (var i = 0; i < 10; i++) {
-      //   for (var k = 0; k < 10; k++) {
-      //     var rect = new Rect();
-      //     displayObj.push(rect);
-      //     scene.add(rect.addRect(k * 30 - 150, i * 30 - 120));
-      //   }
-      // }
+      line.setStartPos(noiseArr);
 
-      var isAnimation = false;
-      var isHutougou = false;
-      var hikakuNuml;
+      //setInterval
+      setInterval(function() {
 
-      setTimeout(function () {
-
-        var preNoise = noiseArr[1];
-        noiseArr.length = 0;
-        console.log("prenoise"+preNoise);
+        var endNoiseArr = [];
+        var date = new Date();
+        console.log((date.getSeconds()+1));
         for (var i = 0; i < modelLine.geometry.vertices.length; i++) {
-
           var vertex = modelLine.geometry.vertices[i];
-          //console.log(simpleNoise.noise(vertex.x / 20, vertex.y / 20) * 100);
-          noiseArr.push(simpleNoise.noise(vertex.x / 20, vertex.y / 20) * 100);
-        }
-        hikakuNum = preNoise+noiseArr[1];
-        if (hikakuNum > 0 ) {
-          isHutougou = true;
-        }else if(hikakuNum < 0){
-          isHutougou = false;
+          endNoiseArr.push(simpleNoise.noise(vertex.x / (date.getSeconds()+1), vertex.y / (date.getSeconds()+1)) * 100);
         }
 
-        isAnimation = true;
+        if (line.getPct() == 0) {
+          line.setEndPos(endNoiseArr);
+        }
 
-
-        //line.setNoiseVal(noiseArr);
       }, 1000);
 
-      //
-      // setInterval(function() {
-      //   var simplexNoise = new SimplexNoise;
-      //   var num = [];
-      //   for (var i = 0; i < displayObj[0].root.children[0].geometry.vertices.length; i++) {
-      //     var vertex = displayObj[0].root.children[0].geometry.vertices[i];
-      //     num.push(simplexNoise.noise(vertex.x / 20, vertex.y / 20) * 100);
-      //   }
-      //
-      //
-      //   for (var i = 0; i < displayObj.length; i++) {
-      //     displayObj[i].addAnimate(num);
-      //   }
-      //   displayObj[0].addAnimate(num);
-      // }, 1000);
 
       //rendering
       var renderer = new THREE.WebGLRenderer();
@@ -246,21 +204,7 @@
       var render = function() {
         requestAnimationFrame(render);
         renderer.render(scene, camera);
-
-        if (isAnimation) {
-          modelLine.geometry.verticesNeedUpdate = true
-          var vertex = modelLine.geometry.vertices[i];
-          if (isHutougou) {
-            console.log("hikakuNum"+hikakuNum);
-            //hikakuNum = hikakuNum + 0.1;
-            modelLine.geometry.vertices[1].y += 0.1;
-          }else if (!isHutougou) {
-            console.log("hikakuNum"+hikakuNum);
-            //hikakuNum = hikakuNum - 0.1;
-            //modelLine.geometry.vertices[1].y = hikakuNum;
-            modelLine.geometry.vertices[1].y += 0.1;
-          }
-        }
+        line.vertexPctUpdate();
 
       };
       render();
