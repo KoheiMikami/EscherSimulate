@@ -31,20 +31,8 @@
   <script src="perlin-noise-simplex.js"></script>
 
   <script>
-    Line = function(translateX, translateY, rotateZ) {
+    Line = function(translateX, translateY, rotateZ, scene) {
       this.curveObject;
-      this.startPos = {
-        x: 0,
-        y: 0
-      };
-      this.endPos = {
-        x: 0,
-        y: 0
-      };
-      this.pos = {
-        x: 0,
-        y: 0
-      };
       this.count;
       this.startPosArr = [];
       this.endPosArr = [];
@@ -69,8 +57,6 @@
       })(), new THREE.LineBasicMaterial({
         color: 0x000000
       }));
-      //this.curveObject.translateX(-400);
-      //this.curveObject.translateY(127);
       this.curveObject.translateX(this.translateX);
       this.curveObject.translateY(this.translateY);
       this.curveObject.scale.x = 0.5;
@@ -180,123 +166,33 @@
       axis.position.set(0, 0, 0);
       //scene.add(axis);
 
-      //var line = new Line();
       var lineArr = [];
       var lineSize = 4;
-      for (var i = 0; i < lineSize; i++) {
-
-        lineArr.push(new Line(-375, 230 + (i * -150),0));
-        var modelLine = lineArr[i].createLine();
-
-        scene.add(modelLine);
-
+      //横
+      for (var i = 0; i <= lineSize; i++) {
+        for (var k = 0; k < lineSize; k++) {
+            lineArr.push(new Line(-375+(i*150), 230 + (k * -150),0));
+        }
       }
 
-      for (var i = 0; i < lineSize; i++) {
-
-        lineArr.push(new Line(-375 + 150, 230 + (i * -150),0));
-        var modelLine = lineArr[i + 4].createLine();
-
-        scene.add(modelLine);
-
-      }
-
-      for (var i = 0; i < lineSize; i++) {
-
-        lineArr.push(new Line(-375 + 300, 230 + (i * -150),0));
-        var modelLine = lineArr[i + 8].createLine();
-
-        scene.add(modelLine);
-
-      }
-
-      for (var i = 0; i < lineSize; i++) {
-
-        lineArr.push(new Line(-375 + 450, 230 + (i * -150),0));
-        var modelLine = lineArr[i + 12].createLine();
-
-        scene.add(modelLine);
-
-      }
-
-      for (var i = 0; i < lineSize; i++) {
-
-        lineArr.push(new Line(-375 + 600, 230 + (i * -150),0));
-        var modelLine = lineArr[i + 16].createLine();
-
-        scene.add(modelLine);
-
-      }
-
-      for (var i = 0; i < 3; i++) {
-
-        lineArr.push(new Line(-375, 230 + (i * -150),-90));
-        var modelLine = lineArr[i + 20].createLine();
-
-        scene.add(modelLine);
-
-      }
-
-      for (var i = 0; i < 3; i++) {
-
-        lineArr.push(new Line(-375+150, 230 + (i * -150),-90));
-        var modelLine = lineArr[i + 23].createLine();
-
-        scene.add(modelLine);
-
-      }
-
-      for (var i = 0; i < 3; i++) {
-
-        lineArr.push(new Line(-375+300, 230 + (i * -150),-90));
-        var modelLine = lineArr[i + 26].createLine();
-
-        scene.add(modelLine);
-
-      }
-
-      for (var i = 0; i < 3; i++) {
-
-        lineArr.push(new Line(-375+450, 230 + (i * -150),-90));
-        var modelLine = lineArr[i + 29].createLine();
-
-        scene.add(modelLine);
-
-      }
-      for (var i = 0; i < 3; i++) {
-
-        lineArr.push(new Line(-375+600, 230 + (i * -150),-90));
-        var modelLine = lineArr[i + 32].createLine();
-
-        scene.add(modelLine);
-
-      }
-      for (var i = 0; i < 3; i++) {
-
-        lineArr.push(new Line(-375+750, 230 + (i * -150),-90));
-        var modelLine = lineArr[i + 35].createLine();
-
-        scene.add(modelLine);
-
+      //縦
+      var lineSize2 = 3;
+      for (var i = 0; i < lineSize2+3; i+=1) {
+        for (var k = 0; k < lineSize2; k++) {
+            lineArr.push(new Line(-375+(i*150), 230 + (k * -150),-90));
+        }
       }
 
 
-
-
-
-      // for (var i = 0; i < lineSize; i++) {
-      //   lineArr.push(new Line(-250, 230+(i*-150)));
-      //   var modelLine = lineArr[i+4].createLine();
-      //
-      //   scene.add(modelLine);
-      // }
-
-      // var modelLine = lineArr[0].createLine();
-      // scene.add(modelLine);
+      for (var i = 0; i < lineArr.length; i++) {
+        var lineObj = lineArr[i].createLine();
+        var modelLine = lineObj;
+        scene.add(lineObj);
+      }
 
       var simpleNoise = new SimplexNoise;
+      var simpleNoise2 = new SimplexNoise;
 
-      //頂点に初期値を与える
       var noiseArr = [];
       for (var i = 0; i < modelLine.geometry.vertices.length; i++) {
 
@@ -305,7 +201,6 @@
         noiseArr.push(syousuten2ika(randomNoise));
 
       }
-      //line.setStartPos(noiseArr);
       for (var i = 0; i < lineArr.length; i++) {
         lineArr[i].setStartPos(noiseArr);
       }
@@ -313,22 +208,26 @@
       setInterval(function() {
 
         var endNoiseArr = [];
+        var endNoiseArr2 = [];
+
         var date = new Date();
         for (var i = 0; i < modelLine.geometry.vertices.length; i++) {
           var vertex = modelLine.geometry.vertices[i];
           endNoiseArr.push(simpleNoise.noise(vertex.x / (date.getSeconds() + 1), vertex.y / (date.getSeconds() + 1)) * 100);
+          endNoiseArr2.push(simpleNoise.noise(vertex.x / (date.getSeconds() -100), vertex.y / (date.getSeconds() -100)) * 100);
+
         }
 
         for (var i = 0; i < lineArr.length; i++) {
           if (lineArr[i].getPct() == 0) {
-            lineArr[i].setEndPos(endNoiseArr);
+            if (i < (lineSize*lineSize)+lineSize) {
+              lineArr[i].setEndPos(endNoiseArr);
+            }else {
+              lineArr[i].setEndPos(endNoiseArr2);
+            }
+
           }
-
         }
-
-        // if (line.getPct() == 0) {
-        //   line.setEndPos(endNoiseArr);
-        // }
 
       }, 1500);
 
