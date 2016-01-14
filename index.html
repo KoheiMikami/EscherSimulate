@@ -14,7 +14,7 @@
       width: 960px;
       margin: 0 auto;
       margin-top: 20px;
-      margin-bottom: 30px;
+      margin-bottom: 70px;
     }
 
     #stage {
@@ -31,16 +31,28 @@
   <script src="perlin-noise-simplex.js"></script>
 
   <script>
-    Line = function() {
+    Line = function(translateX, translateY, rotateZ) {
       this.curveObject;
-      this.startPos = {x:0,y:0};
-      this.endPos = {x:0,y:0};
-      this.pos = {x:0,y:0};
+      this.startPos = {
+        x: 0,
+        y: 0
+      };
+      this.endPos = {
+        x: 0,
+        y: 0
+      };
+      this.pos = {
+        x: 0,
+        y: 0
+      };
       this.count;
       this.startPosArr = [];
       this.endPosArr = [];
       this.pct = 0;
       this.isAnimation = false;
+      this.translateX = translateX;
+      this.translateY = translateY;
+      this.rotateZ = rotateZ;
     };
     Line.prototype.createLine = function() {
       var curve = new THREE.CubicBezierCurve3(
@@ -55,9 +67,15 @@
         geometry.vertices = curve.getPoints(5);
         return geometry;
       })(), new THREE.LineBasicMaterial({
-        color: 0xffffff
+        color: 0x000000
       }));
+      //this.curveObject.translateX(-400);
+      //this.curveObject.translateY(127);
+      this.curveObject.translateX(this.translateX);
+      this.curveObject.translateY(this.translateY);
+      this.curveObject.scale.x = 0.5;
 
+      this.curveObject.rotation.z = this.degToRad(this.rotateZ);
       return this.curveObject;
     };
 
@@ -74,7 +92,7 @@
       this.vertexOp(val);
     };
 
-    Line.prototype.setStartPos = function (val) {
+    Line.prototype.setStartPos = function(val) {
       this.vertexOp(val);
       this.isAnimation = false;
       this.startPosArr.length = 0;
@@ -83,14 +101,14 @@
       }
     };
 
-    Line.prototype.setEndPos = function (val) {
+    Line.prototype.setEndPos = function(val) {
       this.isAnimation = true;
       this.endPosArr.length = 0;
       for (var i = 0; i < this.curveObject.geometry.vertices.length; i++) {
         this.endPosArr.push(val[i]);
       }
     };
-    Line.prototype.getPct = function () {
+    Line.prototype.getPct = function() {
       return this.pct;
     };
 
@@ -106,16 +124,18 @@
         this.pct += 0.1;
 
         if (this.pct > 1.0) {
-          var array = [0,0,0,0,0,0];
+          var array = [0, 0, 0, 0, 0, 0];
           this.setStartPos(this.interpolateByPct(this.pct));
           this.pct = 0.0;
           this.isAnimation = false;
-        }else{
+        } else {
           this.vertexOp(this.interpolateByPct(this.pct));
         }
       }
+    };
 
-
+    Line.prototype.degToRad = function(deg) {
+      return deg * Math.PI / 180;
     };
 
     var syousuten2ika = function(val) {
@@ -126,13 +146,13 @@
       return val2;
     };
 
-    var isInteger = function (val) {
+    var isInteger = function(val) {
       var enumArr = ["true", "none", "false"];
       if (val > 0) {
         return enumArr[0];
       } else if (val < 0) {
         return enumArr[2];
-      }else{
+      } else {
         return enumArr[1];
       }
     };
@@ -160,9 +180,119 @@
       axis.position.set(0, 0, 0);
       //scene.add(axis);
 
-      var line = new Line();
-      var modelLine = line.createLine();
-      scene.add(modelLine);
+      //var line = new Line();
+      var lineArr = [];
+      var lineSize = 4;
+      for (var i = 0; i < lineSize; i++) {
+
+        lineArr.push(new Line(-375, 230 + (i * -150),0));
+        var modelLine = lineArr[i].createLine();
+
+        scene.add(modelLine);
+
+      }
+
+      for (var i = 0; i < lineSize; i++) {
+
+        lineArr.push(new Line(-375 + 150, 230 + (i * -150),0));
+        var modelLine = lineArr[i + 4].createLine();
+
+        scene.add(modelLine);
+
+      }
+
+      for (var i = 0; i < lineSize; i++) {
+
+        lineArr.push(new Line(-375 + 300, 230 + (i * -150),0));
+        var modelLine = lineArr[i + 8].createLine();
+
+        scene.add(modelLine);
+
+      }
+
+      for (var i = 0; i < lineSize; i++) {
+
+        lineArr.push(new Line(-375 + 450, 230 + (i * -150),0));
+        var modelLine = lineArr[i + 12].createLine();
+
+        scene.add(modelLine);
+
+      }
+
+      for (var i = 0; i < lineSize; i++) {
+
+        lineArr.push(new Line(-375 + 600, 230 + (i * -150),0));
+        var modelLine = lineArr[i + 16].createLine();
+
+        scene.add(modelLine);
+
+      }
+
+      for (var i = 0; i < 3; i++) {
+
+        lineArr.push(new Line(-375, 230 + (i * -150),-90));
+        var modelLine = lineArr[i + 20].createLine();
+
+        scene.add(modelLine);
+
+      }
+
+      for (var i = 0; i < 3; i++) {
+
+        lineArr.push(new Line(-375+150, 230 + (i * -150),-90));
+        var modelLine = lineArr[i + 23].createLine();
+
+        scene.add(modelLine);
+
+      }
+
+      for (var i = 0; i < 3; i++) {
+
+        lineArr.push(new Line(-375+300, 230 + (i * -150),-90));
+        var modelLine = lineArr[i + 26].createLine();
+
+        scene.add(modelLine);
+
+      }
+
+      for (var i = 0; i < 3; i++) {
+
+        lineArr.push(new Line(-375+450, 230 + (i * -150),-90));
+        var modelLine = lineArr[i + 29].createLine();
+
+        scene.add(modelLine);
+
+      }
+      for (var i = 0; i < 3; i++) {
+
+        lineArr.push(new Line(-375+600, 230 + (i * -150),-90));
+        var modelLine = lineArr[i + 32].createLine();
+
+        scene.add(modelLine);
+
+      }
+      for (var i = 0; i < 3; i++) {
+
+        lineArr.push(new Line(-375+750, 230 + (i * -150),-90));
+        var modelLine = lineArr[i + 35].createLine();
+
+        scene.add(modelLine);
+
+      }
+
+
+
+
+
+      // for (var i = 0; i < lineSize; i++) {
+      //   lineArr.push(new Line(-250, 230+(i*-150)));
+      //   var modelLine = lineArr[i+4].createLine();
+      //
+      //   scene.add(modelLine);
+      // }
+
+      // var modelLine = lineArr[0].createLine();
+      // scene.add(modelLine);
 
       var simpleNoise = new SimplexNoise;
 
@@ -175,36 +305,48 @@
         noiseArr.push(syousuten2ika(randomNoise));
 
       }
-      line.setStartPos(noiseArr);
+      //line.setStartPos(noiseArr);
+      for (var i = 0; i < lineArr.length; i++) {
+        lineArr[i].setStartPos(noiseArr);
+      }
 
-      //setInterval
       setInterval(function() {
 
         var endNoiseArr = [];
         var date = new Date();
-        console.log((date.getSeconds()+1));
         for (var i = 0; i < modelLine.geometry.vertices.length; i++) {
           var vertex = modelLine.geometry.vertices[i];
-          endNoiseArr.push(simpleNoise.noise(vertex.x / (date.getSeconds()+1), vertex.y / (date.getSeconds()+1)) * 100);
+          endNoiseArr.push(simpleNoise.noise(vertex.x / (date.getSeconds() + 1), vertex.y / (date.getSeconds() + 1)) * 100);
         }
 
-        if (line.getPct() == 0) {
-          line.setEndPos(endNoiseArr);
+        for (var i = 0; i < lineArr.length; i++) {
+          if (lineArr[i].getPct() == 0) {
+            lineArr[i].setEndPos(endNoiseArr);
+          }
+
         }
 
-      }, 1000);
+        // if (line.getPct() == 0) {
+        //   line.setEndPos(endNoiseArr);
+        // }
+
+      }, 1500);
 
 
       //rendering
       var renderer = new THREE.WebGLRenderer();
       renderer.setSize(width, height);
-      renderer.setClearColor(0x000000, 1);
+      renderer.setClearColor(0xffffff, 1);
       document.getElementById('stage').appendChild(renderer.domElement);
 
       var render = function() {
         requestAnimationFrame(render);
         renderer.render(scene, camera);
-        line.vertexPctUpdate();
+        //line.vertexPctUpdate();
+
+        for (var i = 0; i < lineArr.length; i++) {
+          lineArr[i].vertexPctUpdate();
+        }
 
       };
       render();
